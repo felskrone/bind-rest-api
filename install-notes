@@ -1,0 +1,53 @@
+Vagrant general
+###############
+apt-get install git strace psmisc knot-dnsutils vim bind9 bind9utils curl wget python3-pip
+pip3 install connexion[swagger-ui]
+
+vbox-extensions
+###############
+apt-get install gcc make linux-headers-4.9.0-8-amd64
+
+bind
+####
+configure bind with any zone
+
+create shared-secret for nsupdate
+#################################
+$ tsig-keygen update_hosteurope_de
+key "update_hosteurope_de" {
+        algorithm hmac-sha256;
+	secret "qfgD/vb0p+UaFDybowTSMGSrwtfRdtZho3oYyv7zvC8=";
+};
+
+allow zone to be updated with the key
+#####################################
+named.conf.update
+1 zone    "hosteurope.de" {
+2     type master;
+3     file "named.hosteurope.de";
+4     allow-update { key "update_hosteurope_de"; };
+5 };
+
+restart bind
+
+create keyfile for nsupdate
+###########################
+echo "hmac-sha256:update_hosteurope_de:qfgD/vb0p+UaFDybowTSMGSrwtfRdtZho3oYyv7zvC8=" > update_hosteurope_de.key
+
+run nsupdate
+############
+nsupdate -v -k update_hosteurope_de.key
+> server 127.0.0.1
+> zone hosteurope.de
+> update add vs3.hosteurope.de 340 A 10.11.12.103
+> send
+
+
+from bind log
+#############
+Mar 18 12:31:22 cse-test named[14038]: client 127.0.0.1#52450/key update_hosteurope_de: signer "update_hosteurope_de" approved
+Mar 18 12:31:22 cse-test named[14038]: client 127.0.0.1#52450/key update_hosteurope_de: updating zone 'hosteurope.de/IN': adding an RR at 'vs3.hosteurope.de' A 10.11.12.103
+
+root@cse-test:/usr/local/bin# dig  vs3.hosteurope.de @10.0.2.15 +short
+10.11.12.103
+
