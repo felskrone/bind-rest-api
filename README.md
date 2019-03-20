@@ -20,8 +20,8 @@ Setup bind that a single or more zones can be updated using nsupdate.
 
 #### Create shared-secret for nsupdate
 
-    $ tsig-keygen update_hosteurope_de
-        key "update_hosteurope_de" {
+    $ tsig-keygen update_myzone_de
+        key "update_myzone_de" {
             algorithm hmac-sha256;
             secret "qfgD/vb0p+UaFDybowTSMGSrwtfRdtZho3oYyv7zvC8=";
         };
@@ -40,7 +40,7 @@ Restart bind
 
 #### Create keyfile for nsupdate
 
-    $ echo "hmac-sha256:update_hosteurope_de:<key_from_secret_above>" > update_myzone_de.key
+    $ echo "hmac-sha256:update_myzone_de:<key_from_secret_above>" > update_myzone_de.key
     
 #### Run nsupdate test
 
@@ -51,7 +51,7 @@ Restart bind
     > send
     
 #### Check result
-     $ dig  vs3.hosteurope.de @10.0.2.15 +short
+     $ dig  vs3.myzone.de @10.0.2.15 +short
      10.11.12.103
 
 
