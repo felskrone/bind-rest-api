@@ -12,6 +12,10 @@ def add_A(**kwargs):
     ca.logger.debug("Adding / Updating A-Record: {0}".format(kwargs.get('body')))
     return str(kwargs)
 
+def del_A(**kwargs):
+    ca.logger.debug("Deleting A-Record: {0}".format(kwargs.get('body')))
+    return str(kwargs)
+
 def add_TXT(**kwargs):
     ca.logger.debug("Adding / Updating TXT-Record: {0}".format(kwargs.get('body')))
     return str(kwargs)

@@ -27,6 +27,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ARecordMulti'
+    delete:
+      summary: Delete an A-record in a specific zone
+      description: Delete an A-record in a specific zone
+      operationId: binddc.del_A
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "[{'host': 'vs5', 'pointsTo': '198.51.100.42', 'domain': 'test.de'}]"
   /TXT:
     post:
       summary: Add / Update an TXT-record in a specific zone
