@@ -10,7 +10,7 @@ import ast
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-api_url_int = 'http://127.0.0.1:9090/v1.0/{0}'
+api_url_int = 'http://127.0.0.1:9090/v0.0.1/{0}'
 
 def run(atype=None, data=None):
 
@@ -57,8 +57,8 @@ if __name__ == '__main__':
 
 #    run('MX', MX_single)
 #    run('MX', MX_single_type)
-    run('A', MX_multi)
-#    run('A', A_single)
+#    run('MX', MX_multi)
+    run('A', A_single)
 #    run('A', A_single_type)
 #    run('A', A_multi)
 #    run('TXT', TXT_single)

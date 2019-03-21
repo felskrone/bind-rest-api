@@ -2,8 +2,7 @@ import logging
 import subprocess
 import shlex
 import os
-
-from tornado.options import define, options
+from flask import current_app as ca
 
 import logging
 logger = logging.getLogger('Bind-API::' + __name__ + ' ')
@@ -14,10 +13,7 @@ zone {1}
 update add {2}.{1} {3} A {4}
 send\
 '''
-nsupdate_create_ptr = '''\
-update add {0} {1} PTR {2}
-send\
-'''
+
 nsupdate_delete_template = '''\
 server {0}
 update delete {1} A
@@ -27,28 +23,12 @@ send\
 '''
 
 cwd = os.path.dirname(os.path.realpath(__file__))
-define('ttl', default='8640', type=int, help='Default TTL')
-define('nameserver', default='127.0.0.1', type=str, help='Master DNS')
-define('nsupdate_command', default='nsupdate', type=str, help='nsupdate')
-define('sig_key', default=os.path.join(cwd, 'update_hosteurope_de.key'), type=str, help='DNSSEC Key')
+default_tt = '8640'
+default_ns = '127.0.0.1'
+default_ns_cmd = 'nsupdate'
+default_sig_key = os.path.join(cwd, 'update_hosteurope_de.key')
 
 class NSUpdateWrapper(object):
-
-    def __init__(self):
-        print("initing...")
-
-    def update(self, params):
-
-        cmd = nsupdate_create_template.format(
-            options.nameserver,
-            params.get('domain'),
-            params.get('host'),
-            options.ttl,
-            params.get('ip')
-        )
-
-        return self._nsupdate(cmd)
-
 
     def delete(self, params):
         logger.info('Deleting {0}'.format(params))
@@ -58,7 +38,34 @@ class NSUpdateWrapper(object):
         with open('/tmp/foo.test', 'w') as f:
             f.write(data)
 
-    def _nsupdate(self, update):
+    def run(self, nsaction=None, nstype=None, params=None):
+
+        if nsaction == 'ADD':
+            if nstype == 'A':
+                cmd = nsupdate_create_template.format(
+                    default_ns,
+                    params.get('domain'),
+                    params.get('host'),
+                    params.get('ttl', default_tt),
+                    params.get('ip')
+                )
+
+        elif nsaction == 'DEL':
+            if nstype == 'A':
+                 cmd = nsupdate_delete_template.format(
+                    default_ns,
+                    params.get('domain'),
+                    params.get('host'),
+                    options.ttl,
+                    params.get('ip')
+                )
+
+        else:
+            raise TypeError('Unsupported nsaction!')
+
+
+        ca.logger.debug(cmd)
+        return True
 
         self.write_tmp(update)
 
