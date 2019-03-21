@@ -16,9 +16,8 @@ send\
 
 nsupdate_delete_template = '''\
 server {0}
-update delete {1} A
-send
-update delete {1} PTR
+zone {1}
+update delete {2} A
 send\
 '''
 
@@ -58,9 +57,7 @@ class NSUpdateWrapper(object):
                  cmd = nsupdate_delete_template.format(
                     default_ns,
                     params.get('domain'),
-                    params.get('host'),
-                    options.ttl,
-                    params.get('ip')
+                    params.get('host')
                 )
 
         else:
@@ -102,8 +99,13 @@ def add_A(**kwargs):
     return [ret, stdout]
 
 def del_A(**kwargs):
-    ca.logger.debug("Deleting A-Record: {0}".format(kwargs.get('body')))
-    return str(kwargs)
+    ca.logger.debug("Deleting A-Record: {0}".format(str(kwargs)))
+    ret, stdout = nsup.run(
+        nsaction='DEL',
+        nstype='A',
+        params=data
+    )
+    return [ret, stdout]
 
 def add_TXT(**kwargs):
     ca.logger.debug("Adding / Updating TXT-Record: {0}".format(kwargs.get('body')))
