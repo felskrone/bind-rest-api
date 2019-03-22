@@ -17,7 +17,7 @@ def run(atype=None, data=None, operation='post'):
 
     headers = {'content-type': 'application/json'}
 
-    logger.info('DELETEing record with URL {0}'.format(api_del_int.format(atype, 'arecord={0}'.format(data))))
+    logger.info('Processing record with URL {0}'.format(api_del_int.format(atype, 'arecord={0}'.format(data))))
     if operation == 'post':
         logger.info('POSTing data to URL {0}'.format(api_add_int.format(atype)))
         httpsreq = requests.post(
@@ -57,24 +57,24 @@ if __name__ == '__main__':
 
 
 
-#    A_single_type = [{"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0, "type":"A"}]
-  #  A_multi = [
- #       {"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0, "type":"A"},
-  #      {"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0}]
-   # TXT_single_cf = [{"domain": "hosteurope.de", "host": "vs5", "data": "spf=xyz", "txtConflictMatchingMode":"None", "txtConflictMatchingPrefix":"test"}]
+    #A_single_type = [{"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0, "type":"A"}]
+    #A_multi = [
+    #{"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0, "type":"A"},
+    #{"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0}]
+    #TXT_single_cf = [{"domain": "hosteurope.de", "host": "vs5", "data": "spf=xyz", "txtConflictMatchingMode":"None", "txtConflictMatchingPrefix":"test"}]
     #TXT_single_type = [{"domain": "hosteurope.de", "host": "vs5", "data": "spf=xyz", "type":"TXT"}]
-   # TXT_multi = [
-     #   {"domain": "hosteurope.de", "host": "vs5", "data": "spf=abc", "ttl": 0},
-      #  {"domain": "hosteurope.de", "host": "string", "data": "spf=cde", "ttl": 0}]
- #   MX_single_type = [{"domain": "hosteurope.de", "host": "vs5", "pointsTo": "10.11.12.13", "ttl":100, "priority":100, "type":"MX"}]
+    #TXT_multi = [
+    #{"domain": "hosteurope.de", "host": "vs5", "data": "spf=abc", "ttl": 0},
+    #{"domain": "hosteurope.de", "host": "string", "data": "spf=cde", "ttl": 0}]
+    #MX_single_type = [{"domain": "hosteurope.de", "host": "vs5", "pointsTo": "10.11.12.13", "ttl":100, "priority":100, "type":"MX"}]
     #MX_multi = [
-   #     {"domain": "hosteurope.de", "host": "vs5", "pointsTo": "10.11.12.13", "ttl":100, "priority":100, "type":"MX"},
-  #      {"domain": "vs.de", "host": "fg5", "pointsTo": "10.15.52.53", "ttl":100, "priority":100, "type":"MX"}]
+    #{"domain": "hosteurope.de", "host": "vs5", "pointsTo": "10.11.12.13", "ttl":100, "priority":100, "type":"MX"},
+    #{"domain": "vs.de", "host": "fg5", "pointsTo": "10.15.52.53", "ttl":100, "priority":100, "type":"MX"}]
 
     #MULTI_multi = [
- #       {"domain": "hosteurope.de", "host": "vs5", "data": "spf=abc", "ttl": 0, "type":"TXT"},
- #       {"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0, "type":"A"}
- #   ]
+    #       {"domain": "hosteurope.de", "host": "vs5", "data": "spf=abc", "ttl": 0, "type":"TXT"},
+    #       {"domain": "hosteurope.de", "host": "string", "pointsTo": "198.51.100.42", "ttl": 0, "type":"A"}
+    #   ]
 
 
 
@@ -85,7 +85,8 @@ if __name__ == '__main__':
     run('MX', MX_single)
     run('A', A_single)
     run('TXT', TXT_single)
-    run('CNAME', CNAME_single)
+    #run('AAAA', AAAA_single) #doesn't work yet because of no json schema
+    #run('CNAME', CNAME_single) #doesn't work yet because json schema not configured for CNAME
 
 
 

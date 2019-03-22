@@ -3,10 +3,11 @@ import logging
 import subprocess
 import shlex
 import os
-
 import logging
+
 logger = logging.getLogger('Bind-API::' + __name__ + ' ')
 
+### nsupdate templates
 nsupdate_begin_template = '''\
 server {0}
 zone {1}
@@ -34,13 +35,14 @@ update {2} {3}.{4}.{1} {5} SRV {6} {7} {8} {9}
 nsupdate_commit_template = '''\
 send\
 '''
+### /nsupdate templates
 
 cwd = os.path.dirname(os.path.realpath(__file__))
-default_ttl = '86400'
-default_ns = '127.0.0.1'
-default_ns_cmd = 'nsupdate'
-default_sig_key = os.path.join(cwd, 'update_hosteurope_de.key')
-nsactions = {'ADD', 'DEL'}
+default_ttl = '86400' #change this to something useful for your needs
+default_ns = '127.0.0.1' #the ip bind is running on
+default_ns_cmd = 'nsupdate' #nsupdate binary - change appropriately if not in path
+default_sig_key = os.path.join(cwd, 'update_hosteurope_de.key') #specify the key here for updating the zones/domains
+nsactions = {'ADD', 'DEL'} #nsupdate only knows either add or delete
 
 class NSUpdateWrapper(object):
 
@@ -57,7 +59,7 @@ class NSUpdateWrapper(object):
         ca.logger.info("nstype: {0}".format(nstype))
         ca.logger.info("params: {0}".format(params))
 
-        if nsaction in nsactions:
+        if nsaction in nsactions: #translate actions coming from the API to what nsupdate understands
             if nsaction == "ADD":
                 nsaction = "add"
             else:
