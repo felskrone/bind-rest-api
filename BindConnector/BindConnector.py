@@ -57,14 +57,12 @@ class NSUpdateWrapper(object):
 
     def run(self, nsaction=None, nstype=None, params=None):
 
-        # {'rtype': 'A', 'domain': 'hosteurope.de', 'host': 'vs6', 'body': {'ttl': 100, 'pointsTo': '198.51.100.42'}}
-
         ca.logger.info(params)
         ca.logger.info("nstype: {0}".format(nstype))
         ca.logger.info("params: {0}".format(params))
 
         if nsaction in nsactions: #translate actions coming from the API to what nsupdate understands
-            if nstype in ('A', 'AAAA', 'CNAME', 'NS', 'TXT'):
+            if nstype in ('A', 'AAAA', 'CNAME', 'NS', 'TXT', 'SPF'):
                 tmp = nsupdate_begin_template + nsupdate_gen_record_template + nsupdate_commit_template
                 cmd = tmp.format(
                     default_ns,
@@ -76,7 +74,7 @@ class NSUpdateWrapper(object):
                     params.get('body').get('pointsTo')
                 )
 
-            if nstype == "MX":
+            elif nstype == "MX":
                 tmp = nsupdate_begin_template + nsupdate_mxrecord_template + nsupdate_commit_template
                 cmd = tmp.format(
                     default_ns,
@@ -88,19 +86,21 @@ class NSUpdateWrapper(object):
                     params.get('body').get('pointsTo')
                 )
 
-            if nstype == "SRV":
+            elif nstype == "SRV":
                 tmp = nsupdate_begin_template + nsupdate_srvrecord_template + nsupdate_commit_template
                 cmd = tmp.format(
                     default_ns,
-                    params.get('service'),
+                    params.get('body').get('service'),
                     nsaction,
-                    params.get('protocol'),
-                    params.get('TTL') if params.get('ttl', 0) != 0 else default_ttl,
-                    params.get('priority'),
-                    params.get('weight'),
-                    params.get('port'),
-                    params.get('target')
+                    params.get('body').get('protocol'),
+                    params.get('body').get('TTL') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('priority'),
+                    params.get('body').get('weight'),
+                    params.get('body').get('port'),
+                    params.get('body').get('target')
                 )
+            else:
+                raise TypeError('Unsupported nstype!')
 
         else:
             raise TypeError('Unsupported nsaction!')
@@ -125,37 +125,3 @@ class NSUpdateWrapper(object):
         )
 
         return p.returncode, p.stdout, p.stderr
-
-
-nsup = NSUpdateWrapper()
-
-def add_record(**kwargs):
-    ca.logger.debug("Adding / Updating Record: {0}".format(kwargs))
-    retcode, stdout, stderr = nsup.run(nsaction='add', nstype=kwargs.get('rtype'), params=kwargs)
-    ca.logger.info('retcode:{0} stdout:{1} stderr:{2}'.format(retcode, stdout, stderr))
-
-    if retcode == 0:
-        return 200
-    else:
-        return 400 + int(retcode)
-
-
-def add_records(**kwargs):
-    ca.logger.debug("Adding / Updating Records: {0}".format(kwargs))
-    return str(kwargs)
-
-def del_record(**kwargs):
-    ca.logger.debug("Deleting Record: {0}".format(kwargs))
-    return str(kwargs)
-
-def get_record(**kwargs):
-    ca.logger.debug("Retrieving Record: {0}".format(kwargs))
-    return str(kwargs)
-
-def get_records(**kwargs):
-    ca.logger.debug("Retrieving Records: {0}".format(kwargs))
-    return str(kwargs)
-
-
-
-
