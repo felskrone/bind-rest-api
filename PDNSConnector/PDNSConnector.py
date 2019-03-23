@@ -1,0 +1,2 @@
+class PDNSWrapper(object):
+    pass
