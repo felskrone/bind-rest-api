@@ -2,16 +2,52 @@ openapi: "3.0.0"
 
 info:
   title: Bind9+ Rest-API for DomainConnect structured data v0.0.1
-  version: "0.0.1"
+  description: "This is a Rest-API to dynamically configure a BIND9+ server via HTTP(s). Its main purpose is to be utilized in a DomainConnect-environment to automate DNS-management."
+  version: "0.3"
+  contact:
+    email: "cse@heg.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 servers:
-  - url: http://localhost:9090/v0.0.1
+  - url: http://localhost:9090/v0.0.2
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/C_S_E/Bind-DomainConnect-Rest/0.2
+
+tags:
+  - name: Single
+    description: Single record-operations, add one, delete one
+  - name: Multi
+    description: Multiple record-operations, handles a list of records to add or delete
 
 paths:
-  /A:
+  /dns/{domain}/{rtype}/{host}:
+    parameters:
+      - in: path
+        name: rtype
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
+      - in: path
+        name: domain
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+\.\w+$'
+      - in: path
+        name: host
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
     post:
-      summary: Add / Update an A-record in a specific zone
-      description: Add / Update an A-record in a specific zone
-      operationId: BindConnector.BindConnector.add_A
+      summary: Add / Update any single DNS-record in a specific donain/zone
+      description: Add / Update any single DNS-record in a specific domain/zone
+      operationId: BindConnector.BindConnector.add_record
+      tags:
+        - Single
       responses:
         200:
           description: JSON response echoing the data
@@ -19,18 +55,40 @@ paths:
             applicaton/json:
               schema:
                 type: string
-                example: "[{'host': 'vs5', 'pointsTo': '198.51.100.42', 'domain': 'test.de'}]"
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
       requestBody:
-        description: Optional description in *Markdown*
+        description: Record-specific options, priority for MX, data for TXT, etc.
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ARecordMulti'
+              anyOf:
+                - $ref: '#/components/schemas/ARecordShort'
+                - $ref: '#/components/schemas/AAAARecordShort'
+                - $ref: '#/components/schemas/MXRecordShort'
+                - $ref: '#/components/schemas/TXTRecordShort'
+                - $ref: '#/components/schemas/SRVRecordShort'
+
+    get:
+      summary: Get any single DNS-record from a specific domain/zone
+      description: Get any single DNS-record from a specific domain/zone
+      operationId: BindConnector.BindConnector.get_record
+      tags:
+        - Single
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
     delete:
-      summary: Delete an A-record in a specific zone
-      description: Delete an A-record in a specific zone
-      operationId: BindConnector.BindConnector.del_A
+      summary: Delete mutiple DNS-records from from a domain/zone
+      description: Delete multiple DNS-records from a domain/zone
+      operationId: BindConnector.BindConnector.del_record
+      tags:
+        - Single
       responses:
         200:
           description: JSON response echoing the data
@@ -38,31 +96,21 @@ paths:
             applicaton/json:
               schema:
                 type: string
-                example: "[{'host': 'vs5', 'pointsTo': '198.51.100.42', 'domain': 'test.de'}]"
-  /TXT:
-    post:
-      summary: Add / Update an TXT-record in a specific zone
-      description: Add / Update an A-record in a specific zone
-      operationId: BindConnector.BindConnector.add_TXT
-      responses:
-        200:
-          description: JSON response echoing the data
-          content:
-            applicaton/json:
-              schema:
-                type: string
-                example: "[{'host': 'vs5', 'ip': '198.51.100.42', 'domain': 'test.de'}]"
-      requestBody:
+                example: "[{'host': 'vs5', 'domain': 'test.de'}]"
+  /dnsmulti/{action}:
+    parameters:
+      - in: path
+        name: action
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TXTRecordMulti'
-  /MX:
+        schema:
+          type: string
+          pattern: '^[ADD|DELETE]$'
     post:
-      summary: Add / Update an MX-record in a specific zone
-      description: Add / Update an MX-record in a specific zone
-      operationId: BindConnector.BindConnector.add_MX
+      summary: Add / Update / Delete multiple DNS-record in a specific domain/zone
+      description: Add / Update / Delete multiple DNS-record in a specific domain/zone
+      operationId: BindConnector.BindConnector.add_records
+      tags:
+        - Multi
       responses:
         200:
           description: JSON response echoing the data
@@ -70,117 +118,116 @@ paths:
             applicaton/json:
               schema:
                 type: string
-                example: "[{'host': 'vs5', 'pointsTo': '198.51.100.42', 'ttl': 'test.de', 'priority': '200'}]"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MXRecordMulti'
-  /CNAME:
-    post:
-      summary: Add / Update a CNAME-record in a specific zone
-      description: Add / Update an CNAMW-record in a specific zone
-      operationId: BindConnector.BindConnector.add_CNAME
-      responses:
-        200:
-          description: JSON response echoing the data
-          content:
-            applicaton/json:
-              schema:
-                type: string
-                example: "[{'host': 'vs5', 'pointsTo': '198.51.100.42', 'ttl': 'test.de', 'priority': '200'}]"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CNAMERecordMulti'
-  /MULTI:
-    post:
-      summary: Add / Update a list of records
-      description: Add / Update a list of records
-      operationId: BindConnector.BindConnector.add_Multi
-      responses:
-        200:
-          description: JSON response echoing the data
-          content:
-            applicaton/json:
-              schema:
-                type: string
-                example: "{'host': 'vs5', 'pointsTo': '198.51.100.42', 'domain': 'test.de'}"
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/MultiRecord'
+    get:
+      summary: Get multiple DNS-record from local bind-service
+      description: Get multiple DNS-records local bind service
+      operationId: BindConnector.BindConnector.get_records
+      tags:
+        - Multi
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
 components:
   schemas:
-    ARecord:
+    MXRecordShort:
       required:
-        - host
         - pointsTo
-        - domain
+        - priority
       properties:
-        host:
-          type: string
-          pattern: "^\\w+$"
         pointsTo:
           type: string
-          format: ipv4
-        domain:
-          type: string
-          pattern: "^.+\\..*$"
         ttl:
           type: integer
           format: int32
-        type:
-          type: string
-    CNAMERecord:
+        priority:
+          type: integer
+          format: int32
+    ARecordShort:
       required:
-        - host
         - pointsTo
-        - domain
+        - ttl
       properties:
-        host:
-          type: string
-          pattern: "^\\w+$"
         pointsTo:
           type: string
           format: ipv4
-        domain:
-          type: string
-          pattern: "^.+\\..*$"
         ttl:
           type: integer
           format: int32
-        type:
-          type: string
-    TXTRecord:
+    AAAARecordShort:
       required:
-        - host
+        - pointsTo
+        - ttl
+      properties:
+        pointsTo:
+          type: string
+          format: ipv6
+        ttl:
+          type: integer
+          format: int32
+    TXTRecordShort:
+      required:
         - data
-        - domain
       properties:
-        host:
-          type: string
-          pattern: "^\\w+$"
         data:
           type: string
         txtConflictMatchingMode:
           type: string
         txtConflictMatchingPrefix:
           type: string
+    SRVRecordShort:
+      required:
+        - priority
+        - protocol
+        - service
+        - weight
+        - port
+      properties:
+        priority:
+          type: integer
+        protocol:
+          type: string
+        service:
+          type: string
+        weight:
+          type: integer
+        port:
+          type: integer
         ttl:
           type: integer
           format: int32
+    ARecordFull:
+      required:
+        - host
+        - pointsTo
+        - domain
+      properties:
+        host:
+          type: string
+          pattern: "^\\w+$"
+        pointsTo:
+          type: string
+          format: ipv4
         domain:
           type: string
           pattern: "^.+\\..*$"
+        ttl:
+          type: integer
+          format: int32
         type:
           type: string
-    MXRecord:
+    MXRecordFull:
       required:
         - host
         - pointsTo
@@ -203,27 +250,9 @@ components:
           format: int32
         type:
           type: string
-    ARecordMulti:
-      type: array
-      items:
-         $ref: '#/components/schemas/ARecord'
-    TXTRecordMulti:
-      type: array
-      items:
-         $ref: '#/components/schemas/TXTRecord'
-    MXRecordMulti:
-      type: array
-      items:
-         $ref: '#/components/schemas/MXRecord'
-    CNAMERecordMulti:
-      type: array
-      items:
-         $ref: '#/components/schemas/CNAMERecord'
     MultiRecord:
       type: array
       items:
         oneOf:
-         - $ref: '#/components/schemas/ARecord'
-         - $ref: '#/components/schemas/TXTRecord'
-         - $ref: '#/components/schemas/MXRecord'
-         - $ref: '#/components/schemas/CNAMERecord'
+         - $ref: '#/components/schemas/ARecordFull'
+         - $ref: '#/components/schemas/MXRecordFull'
