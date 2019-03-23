@@ -1,0 +1,6 @@
+Main:
+  default_ttl: 600
+  backend: bind
+  ipaddr: 127.0.0.1
+  port: 53
+  keyfile: /mnt/bind-restapi-openapi/tests/update_hosteurope_de.key

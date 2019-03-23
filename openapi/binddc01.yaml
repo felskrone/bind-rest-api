@@ -45,7 +45,7 @@ paths:
     post:
       summary: Add / Update any single DNS-record in a specific donain/zone
       description: Add / Update any single DNS-record in a specific domain/zone
-      operationId: BindConnector.BindConnector.add_record
+      operationId: RequestHandler.add_record
       tags:
         - Single
       responses:
@@ -72,7 +72,7 @@ paths:
     get:
       summary: Get any single DNS-record from a specific domain/zone
       description: Get any single DNS-record from a specific domain/zone
-      operationId: BindConnector.BindConnector.get_record
+      operationId: RequestHandler.get_record
       tags:
         - Single
       responses:
@@ -86,7 +86,7 @@ paths:
     delete:
       summary: Delete mutiple DNS-records from from a domain/zone
       description: Delete multiple DNS-records from a domain/zone
-      operationId: BindConnector.BindConnector.del_record
+      operationId: RequestHandler.del_record
       tags:
         - Single
       responses:
@@ -108,7 +108,7 @@ paths:
     post:
       summary: Add / Update / Delete multiple DNS-record in a specific domain/zone
       description: Add / Update / Delete multiple DNS-record in a specific domain/zone
-      operationId: BindConnector.BindConnector.add_records
+      operationId: RequestHandler.add_records
       tags:
         - Multi
       responses:
@@ -128,7 +128,7 @@ paths:
     get:
       summary: Get multiple DNS-record from local bind-service
       description: Get multiple DNS-records local bind service
-      operationId: BindConnector.BindConnector.get_records
+      operationId: RequestHandler.get_records
       tags:
         - Multi
       responses:
