@@ -18,7 +18,7 @@ def run():
         app.app.config.update(config)
         app.app.logger.addHandler(logger)
         app.app.logger.setLevel(logging.DEBUG)
-        app.add_api('binddc01.yaml', arguments={'title': 'DomainConnect for Bind9+ 0.1'})
+        app.add_api('bindrest01.yaml', arguments={'title': 'DomainConnect for Bind9+ 0.1'})
         app.run()
 
 if __name__ == '__main__':

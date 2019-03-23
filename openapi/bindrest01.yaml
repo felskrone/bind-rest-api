@@ -14,9 +14,9 @@ servers:
 # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/C_S_E/Bind-DomainConnect-Rest/0.2
-
+    
 tags:
-  - name: Single
+  - name: Single 
     description: Single record-operations, add one, delete one
   - name: Multi
     description: Multiple record-operations, handles a list of records to add or delete
@@ -68,13 +68,16 @@ paths:
                 - $ref: '#/components/schemas/MXRecordShort'
                 - $ref: '#/components/schemas/TXTRecordShort'
                 - $ref: '#/components/schemas/SRVRecordShort'
-
+                - $ref: '#/components/schemas/CNAMERecordShort'
+                - $ref: '#/components/schemas/NSRecordShort'
+                - $ref: '#/components/schemas/SPFMRecordShort'
+                
     get:
       summary: Get any single DNS-record from a specific domain/zone
       description: Get any single DNS-record from a specific domain/zone
       operationId: RequestHandler.get_record
       tags:
-        - Single
+        - Single      
       responses:
         200:
           description: JSON response echoing the data
@@ -88,7 +91,7 @@ paths:
       description: Delete multiple DNS-records from a domain/zone
       operationId: RequestHandler.del_record
       tags:
-        - Single
+        - Single      
       responses:
         200:
           description: JSON response echoing the data
@@ -104,13 +107,13 @@ paths:
         required: true
         schema:
           type: string
-          pattern: '^[ADD|DELETE]$'
+          pattern: '^[ADD|DELETE]$'  
     post:
       summary: Add / Update / Delete multiple DNS-record in a specific domain/zone
       description: Add / Update / Delete multiple DNS-record in a specific domain/zone
       operationId: RequestHandler.add_records
       tags:
-        - Multi
+        - Multi      
       responses:
         200:
           description: JSON response echoing the data
@@ -138,9 +141,42 @@ paths:
             applicaton/json:
               schema:
                 type: string
-                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"               
 components:
   schemas:
+    CNAMERecordShort:
+      required:
+      - pointsTo
+      - host
+      properties:
+        pointsTo:
+          type: string
+        ttl:
+          type: integer
+          format: int32
+        host:
+          type: string
+    SPFMRecordShort:
+      required:
+      - spfRules
+      - host
+      properties:
+        spfRules:
+          type: string
+        host:
+          type: string
+    NSRecordShort:
+      required:
+      - pointsTo
+      - host
+      properties:
+        pointsTo:
+          type: string
+        ttl:
+          type: integer
+          format: int32
+        host:
+          type: string
     MXRecordShort:
       required:
         - pointsTo
@@ -175,7 +211,7 @@ components:
           format: ipv6
         ttl:
           type: integer
-          format: int32
+          format: int32          
     TXTRecordShort:
       required:
         - data
@@ -199,14 +235,14 @@ components:
         protocol:
           type: string
         service:
-          type: string
+          type: string          
         weight:
           type: integer
         port:
           type: integer
         ttl:
           type: integer
-          format: int32
+          format: int32             
     ARecordFull:
       required:
         - host
@@ -226,7 +262,7 @@ components:
           type: integer
           format: int32
         type:
-          type: string
+          type: string          
     MXRecordFull:
       required:
         - host
@@ -249,7 +285,7 @@ components:
           type: integer
           format: int32
         type:
-          type: string
+          type: string          
     MultiRecord:
       type: array
       items:
