@@ -47,6 +47,9 @@ nsactions = ['add', 'del'] #nsupdate only knows either add or delete
 
 class NSUpdateWrapper(object):
 
+    def __init__(self, **options):
+        self.options = options
+
     def delete(self, params):
         logger.info('Deleting {0}'.format(params))
         return True,True
