@@ -1,0 +1,93 @@
+DOMAINCONNECT:
+--------------
+
+A: host, pointsTo, TTL
+
+AAAA: host, pointsTo, TTL
+
+CNAME: host, pointsTo, TTL (host must not be null or @)
+
+NS: host, pointsTo, TTL (host must not be null or @)
+
+TXT: host, data, TTL, txtConflictMatchingMode, txtConflictMatchingPrefix
+
+MX: host, pointsTo, TTL, priority
+
+SRV: name, target, TTL, priority, protocol, service, weight, port
+
+SPFM: host, spfRules //why is TTL missing here?
+
+NSUPDATE:
+--------
+
+a-record:
+ server 127.0.0.1
+ zone domain.de
+ #domainconnect: update add host TTL A pointsTo
+ update add string.domain.tld 8640 A 198.51.100.49
+ update delete string.domain.tld A 198.51.100.49
+ show
+ send
+
+aaaa-record:
+ server 127.0.0.1
+ zone domain.de
+ #domainconnect: update add host TTL AAAA pointsTo
+ update add string.domain.tld 8640 AAAA ::1
+ update delete string.domain.tld AAAA ::1
+ show
+ send
+
+cname-record:
+ server 127.0.0.1
+ zone domain.de
+ #domainconnect: update add host TTL CNAME pointsTo
+ update add teststring.domain.tld 8640 CNAME anotherteststring.domain.tld.
+ update delete teststring.domain.tld 8640 CNAME anotherteststring.domain.tld.
+ show
+ send
+
+ns-record:
+ server 127.0.0.1
+ zone domain.de
+ #domainconnect: update add host TTL NS pointsTo
+ update add string.domain.tld 8640 NS otherns.domain.tld
+ update delete string.domain.tld 8640 NS otherns.domain.tld
+ show
+ send
+
+txt-record:
+ server 127.0.0.1
+ zone domain.de
+ #domainconnect: update add host TTL TXT data
+ update add string.domain.tld 8640 TXT "string"
+ update delete string.domain.tld 8640 TXT "string"
+ show
+ send
+
+mx-record:
+ server 127.0.0.1
+ zone domain.de
+ #domainconnect: update add host TTL MX priority pointsTo
+ update add string.domain.tld TTL MX 10 198.51.100.49 
+ update delete string.domain.tld TTL MX 10 198.51.100.49 
+ show
+ send
+
+srv-record:
+ server 127.0.0.1
+ zone domain.de
+ #domainconnect: update add service.protocol.name TTL SRV priority weight port target
+ update add _service._protocol.domain.tld 8640  SRV 5060 5060 5060 siplogin.de
+ update delete _service._protocol.domain.tld 8640  SRV 5060 5060 5060 siplogin.de
+ show
+ send
+
+spfm-record:
+ server 127.0.0.1
+ zone domain.tld
+ #domainconnect: update add host TXT spfRules
+ update add string.domain.tld TXT "spf-string"
+ update delete string.domain.tld TXT "spf-string"
+ show
+ send
