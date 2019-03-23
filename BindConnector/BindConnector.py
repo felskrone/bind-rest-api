@@ -127,34 +127,7 @@ class NSUpdateWrapper(object):
         return p.returncode, p.stdout, p.stderr
 
 
-nsup = NSUpdateWrapper()
 
-def add_record(**kwargs):
-    ca.logger.debug("Adding / Updating Record: {0}".format(kwargs))
-    retcode, stdout, stderr = nsup.run(nsaction='add', nstype=kwargs.get('rtype'), params=kwargs)
-    ca.logger.info('retcode:{0} stdout:{1} stderr:{2}'.format(retcode, stdout, stderr))
-
-    if retcode == 0:
-        return 200
-    else:
-        return 400 + int(retcode)
-
-
-def add_records(**kwargs):
-    ca.logger.debug("Adding / Updating Records: {0}".format(kwargs))
-    return str(kwargs)
-
-def del_record(**kwargs):
-    ca.logger.debug("Deleting Record: {0}".format(kwargs))
-    return str(kwargs)
-
-def get_record(**kwargs):
-    ca.logger.debug("Retrieving Record: {0}".format(kwargs))
-    return str(kwargs)
-
-def get_records(**kwargs):
-    ca.logger.debug("Retrieving Records: {0}".format(kwargs))
-    return str(kwargs)
 
 
 
