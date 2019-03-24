@@ -26,8 +26,9 @@ update {2} {3}.{1} {4} MX {5} {6}
 '''
 
 # {1} = name, {2} = action,  {3} = service, {4} = protocol, {5} = TTL, {6} = priority, {7} = weight, {8} = port, {9} = target
+# _ts3._udp.ts.meinedomain.de 86400 0 5 9987 ts.meinedomain.de
 nsupdate_srvrecord_template = '''\
-update {2} {3}.{4}.{1} {5} SRV {6} {7} {8} {9}
+update {2} {3}.{1} {4} SRV {5} {6} {7} {8}
 \
 '''
 
@@ -60,9 +61,7 @@ class NSUpdateWrapper(object):
 
     def run(self, nsaction=None, nstype=None, params=None):
 
-        ca.logger.info(params)
-        ca.logger.info("nstype: {0}".format(nstype))
-        ca.logger.info("params: {0}".format(params))
+        ca.logger.debug("nsaction: {0} nstype:{1} params:{2}".format(nsaction, nstype, params))
 
         if nsaction in nsactions: #translate actions coming from the API to what nsupdate understands
             if nstype in ('A', 'AAAA', 'CNAME', 'NS', 'TXT', 'SPF'):
@@ -79,6 +78,7 @@ class NSUpdateWrapper(object):
 
             elif nstype == "MX":
                 tmp = nsupdate_begin_template + nsupdate_mxrecord_template + nsupdate_commit_template
+
                 cmd = tmp.format(
                     default_ns,
                     params.get('domain'),
@@ -93,10 +93,10 @@ class NSUpdateWrapper(object):
                 tmp = nsupdate_begin_template + nsupdate_srvrecord_template + nsupdate_commit_template
                 cmd = tmp.format(
                     default_ns,
-                    params.get('body').get('service'),
+                    params.get('domain'),
                     nsaction,
                     params.get('body').get('protocol'),
-                    params.get('body').get('TTL') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
                     params.get('body').get('priority'),
                     params.get('body').get('weight'),
                     params.get('body').get('port'),
