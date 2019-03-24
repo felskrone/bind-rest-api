@@ -97,7 +97,7 @@ paths:
                 - $ref: '#/components/schemas/NSRecordShort'
                 - $ref: '#/components/schemas/SPFMRecordShort'
 
-  /dns/{domain}/{rtype}/{host}:
+  /dns/add/{domain}/{rtype}/{host}:
     parameters:
       - in: path
         name: rtype
