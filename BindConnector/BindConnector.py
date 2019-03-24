@@ -74,7 +74,7 @@ class NSUpdateWrapper(object):
                     params.get('host'),
                     params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
                     nstype,
-                    params.get('body').get('pointsTo')
+                    params.get('pointsTo') if params.get('pointsTo', False) != False else params.get('body').get('pointsTo')
                 )
 
             elif nstype == "MX":
