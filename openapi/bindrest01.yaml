@@ -47,6 +47,56 @@ paths:
                 type: string
                 example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
 
+  /dns/delete/{domain}/{rtype}/{host}:
+    parameters:
+      - in: path
+        name: rtype
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
+      - in: path
+        name: domain
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+\.\w+$'
+      - in: path
+        name: host
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
+    post:
+      summary: Delete any single DNS-record in a specific domain/zone
+      description: Delete any single DNS-record in a specific domain/zone
+      operationId: RequestHandler.del_record
+      tags:
+        - Single
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
+      requestBody:
+        description: Record-specific options, priority for MX, data for TXT, etc.
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/ARecordShort'
+                - $ref: '#/components/schemas/AAAARecordShort'
+                - $ref: '#/components/schemas/MXRecordShort'
+                - $ref: '#/components/schemas/TXTRecordShort'
+                - $ref: '#/components/schemas/SRVRecordShort'
+                - $ref: '#/components/schemas/CNAMERecordShort'
+                - $ref: '#/components/schemas/NSRecordShort'
+                - $ref: '#/components/schemas/SPFMRecordShort'
+
   /dns/{domain}/{rtype}/{host}:
     parameters:
       - in: path
@@ -111,27 +161,6 @@ paths:
               schema:
                 type: string
                 example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
-    delete:
-      parameters:
-        - in: query
-          name: pointsTo
-          required: true
-          schema:
-            type: string
-            format: ipv4
-      summary: Delete mutiple DNS-records from from a domain/zone
-      description: Delete multiple DNS-records from a domain/zone
-      operationId: RequestHandler.del_record
-      tags:
-        - Single
-      responses:
-        200:
-          description: JSON response echoing the data
-          content:
-            applicaton/json:
-              schema:
-                type: string
-                example: "[{'host': 'vs5', 'domain': 'test.de'}]"
   /dnsmulti/{action}:
     parameters:
       - in: path
@@ -261,6 +290,7 @@ components:
         - service
         - weight
         - port
+        - target
       properties:
         priority:
           type: integer
@@ -272,6 +302,8 @@ components:
           type: integer
         port:
           type: integer
+        target:
+          type: string
         ttl:
           type: integer
           format: int32
