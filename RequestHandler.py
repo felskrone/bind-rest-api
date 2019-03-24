@@ -11,7 +11,7 @@ class RequestHandler(object):
     backend = None
     dnswrap = None
 
-    def __init__(self, current_app, **options):
+    def __init__(self, **options):
         self.options = options
 
         self.backend = self.options.get('backend', 'bind')
@@ -91,8 +91,7 @@ class RequestHandler(object):
         return self.handle_error(retcode, stdout, stderr)
 
 
-
-reqhandler = RequestHandler(ca.config)
+reqhandler = RequestHandler(**ca.config)
 
 def add_record(**kwargs):
     ca.logger.info(kwargs)
