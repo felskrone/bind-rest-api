@@ -1,0 +1,4 @@
+key "update_example_org" {
+	algorithm hmac-sha256;
+	secret "aKKLrzJAybBb+U1LY1j7IEPXrmnvFKt6ktXWDOUy7Fk=";
+};
