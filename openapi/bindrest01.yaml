@@ -208,15 +208,12 @@ components:
     CNAMERecordShort:
       required:
       - pointsTo
-      - host
       properties:
         pointsTo:
           type: string
         ttl:
           type: integer
           format: int32
-        host:
-          type: string
     SPFMRecordShort:
       required:
       - spfRules
