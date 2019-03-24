@@ -20,6 +20,8 @@ tags:
     description: Single record-operations, add one, delete one
   - name: Multi
     description: Multiple record-operations, handles a list of records to add or delete
+  - name: Misc
+    description: Miscellanous calls
 
 paths:
   /dns/getzone:
@@ -35,7 +37,7 @@ paths:
       description: Get the complete zone for a certain domain
       operationId: RequestHandler.get_zone
       tags:
-        - Single
+        - Misc
       responses:
         200:
           description: JSON response echoing the data
@@ -110,6 +112,13 @@ paths:
                 type: string
                 example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
     delete:
+      parameters:
+        - in: query
+          name: pointsTo
+          required: true
+          schema:
+            type: string
+            format: ipv4
       summary: Delete mutiple DNS-records from from a domain/zone
       description: Delete multiple DNS-records from a domain/zone
       operationId: RequestHandler.del_record
