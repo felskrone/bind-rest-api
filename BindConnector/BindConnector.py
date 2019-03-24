@@ -73,7 +73,7 @@ class NSUpdateWrapper(object):
             if nstype in ('A', 'AAAA', 'CNAME', 'NS', 'TXT', 'SPF'):
 
                 # the actual data fields are named differently depending on the record
-                if nstype == 'A':
+                if nstype == 'A' or nstype == 'CNAME' or nstype == 'NS':
                     data = params.get('body').get('pointsTo')
                 elif nstype == 'TXT':
                     data = params.get('body').get('data')
