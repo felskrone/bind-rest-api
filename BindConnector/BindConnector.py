@@ -65,6 +65,17 @@ class NSUpdateWrapper(object):
 
         if nsaction in nsactions: #translate actions coming from the API to what nsupdate understands
             if nstype in ('A', 'AAAA', 'CNAME', 'NS', 'TXT', 'SPF'):
+
+                # the actual data fields are named differently depending on the record
+                if nstype == 'A':
+                    data = params.get('body').get('pointsTo')
+                elif nstype == 'TXT':
+                    data = params.get('body').get('data')
+                elif nstype == 'SPF':
+                    data = params.get('body').get('spfRules')
+                else:
+                    raise ValueError('Missing data-field in record-data: {0}'.format(params))
+
                 tmp = nsupdate_begin_template + nsupdate_gen_record_template + nsupdate_commit_template
                 cmd = tmp.format(
                     default_ns,
@@ -73,7 +84,7 @@ class NSUpdateWrapper(object):
                     params.get('host'),
                     params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
                     nstype,
-                    params.get('pointsTo') if params.get('pointsTo', False) != False else params.get('body').get('pointsTo')
+                    data
                 )
 
             elif nstype == "MX":
