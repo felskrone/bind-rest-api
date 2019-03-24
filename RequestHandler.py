@@ -40,8 +40,8 @@ class RequestHandler(object):
         ca.logger.debug("Adding / Updating Record: {0}".format(kwargs))
         try:
             retcode, stdout, stderr = self.dnswrap.run(nsaction='add', nstype=kwargs.get('rtype'), params=kwargs)
-        except TypeError:
-            return [500, 'Failed to execute opersation!']
+        except TypeError as exec_err:
+            return [500, 'Connector failed to execute: {0}'.format(exec_err)]
 
         return self.handle_error(retcode, stdout, stderr)
 
