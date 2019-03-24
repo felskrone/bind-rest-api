@@ -50,6 +50,12 @@ class NSUpdateWrapper(object):
 
     def __init__(self, **options):
         self.options = options
+        self.ttl = options.get('default_ttl', default_ttl)
+        self.ns = options.get('default_ns', default_ns)
+
+        if 'Bind' in self.options:
+            self.nscmd = self.options.get('Bind').get('nscmd', default_ns_cmd)
+            self.nskey = self.options.get('Bind').get('keyfile', default_sig_key)
 
     def delete(self, params):
         logger.info('Deleting {0}'.format(params))
@@ -78,11 +84,11 @@ class NSUpdateWrapper(object):
 
                 tmp = nsupdate_begin_template + nsupdate_gen_record_template + nsupdate_commit_template
                 cmd = tmp.format(
-                    default_ns,
+                    self.ns,
                     params.get('domain'),
                     nsaction,
                     params.get('host'),
-                    params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('ttl') if params.get('body').get('ttl', 0) != 0 else self.ttl,
                     nstype,
                     data
                 )
@@ -91,11 +97,11 @@ class NSUpdateWrapper(object):
                 tmp = nsupdate_begin_template + nsupdate_mxrecord_template + nsupdate_commit_template
 
                 cmd = tmp.format(
-                    default_ns,
+                    self.ns,
                     params.get('domain'),
                     nsaction,
                     params.get('host'),
-                    params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('ttl') if params.get('body').get('ttl', 0) != 0 else self.ttl,
                     params.get('body').get('priority'),
                     params.get('body').get('pointsTo')
                 )
@@ -103,11 +109,11 @@ class NSUpdateWrapper(object):
             elif nstype == "SRV":
                 tmp = nsupdate_begin_template + nsupdate_srvrecord_template + nsupdate_commit_template
                 cmd = tmp.format(
-                    default_ns,
+                    self.ns,
                     params.get('domain'),
                     nsaction,
                     params.get('body').get('protocol'),
-                    params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('ttl') if params.get('body').get('ttl', 0) != 0 else self.ttl,
                     params.get('body').get('priority'),
                     params.get('body').get('weight'),
                     params.get('body').get('port'),
@@ -124,8 +130,8 @@ class NSUpdateWrapper(object):
         self.write_tmp(cmd)
 
         cmd = '{0} -k {1} {2}'.format(
-            default_ns_cmd,
-            default_sig_key,
+            self.nscmd,
+            self.nskey,
             '/tmp/foo.test'
         )
         ca.logger.info("Running command: {0}".format(cmd))
