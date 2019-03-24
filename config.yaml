@@ -3,4 +3,7 @@ Main:
   backend: bind
   ipaddr: 127.0.0.1
   port: 53
-  keyfile: /mnt/bind-restapi-openapi/tests/update_hosteurope_de.key
+
+Bind:
+  nscmd: /usr/local/bin/nsupdate
+  keyfile: /usr/local/bin/update_hosteurope_de.key
