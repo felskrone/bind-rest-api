@@ -14,14 +14,89 @@ servers:
 # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/C_S_E/Bind-DomainConnect-Rest/0.2
-
+    
 tags:
-  - name: Single
+  - name: Single 
     description: Single record-operations, add one, delete one
   - name: Multi
     description: Multiple record-operations, handles a list of records to add or delete
+  - name: Misc
+    description: Miscellanous calls
 
 paths:
+  /dns/getzone:
+    get:
+      parameters:
+        - in: query
+          name: domain
+          required: true
+          schema:
+            type: string
+            pattern: '^\w+\.\w+$'
+      summary: Get the complete zone for a certain domain
+      description: Get the complete zone for a certain domain
+      operationId: RequestHandler.get_zone
+      tags:
+        - Misc
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
+
+  /dns/delete/{domain}/{rtype}/{host}:
+    parameters:
+      - in: path
+        name: rtype
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
+      - in: path
+        name: domain
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+\.\w+$'
+      - in: path
+        name: host
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
+    post:
+      summary: Delete any single DNS-record in a specific domain/zone
+      description: Delete any single DNS-record in a specific domain/zone
+      operationId: RequestHandler.del_record
+      tags:
+        - Single
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
+      requestBody:
+        description: Record-specific options, priority for MX, data for TXT, etc.
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/ARecordShort'
+                - $ref: '#/components/schemas/AAAARecordShort'
+                - $ref: '#/components/schemas/MXRecordShort'
+                - $ref: '#/components/schemas/TXTRecordShort'
+                - $ref: '#/components/schemas/SRVRecordShort'
+                - $ref: '#/components/schemas/CNAMERecordShort'
+                - $ref: '#/components/schemas/NSRecordShort'
+                - $ref: '#/components/schemas/SPFMRecordShort'
+
   /dns/{domain}/{rtype}/{host}:
     parameters:
       - in: path
@@ -68,6 +143,9 @@ paths:
                 - $ref: '#/components/schemas/MXRecordShort'
                 - $ref: '#/components/schemas/TXTRecordShort'
                 - $ref: '#/components/schemas/SRVRecordShort'
+                - $ref: '#/components/schemas/CNAMERecordShort'
+                - $ref: '#/components/schemas/NSRecordShort'
+                - $ref: '#/components/schemas/SPFMRecordShort'
 
     get:
       summary: Get any single DNS-record from a specific domain/zone
@@ -83,20 +161,6 @@ paths:
               schema:
                 type: string
                 example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
-    delete:
-      summary: Delete mutiple DNS-records from from a domain/zone
-      description: Delete multiple DNS-records from a domain/zone
-      operationId: RequestHandler.del_record
-      tags:
-        - Single
-      responses:
-        200:
-          description: JSON response echoing the data
-          content:
-            applicaton/json:
-              schema:
-                type: string
-                example: "[{'host': 'vs5', 'domain': 'test.de'}]"
   /dnsmulti/{action}:
     parameters:
       - in: path
@@ -141,6 +205,33 @@ paths:
                 example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
 components:
   schemas:
+    CNAMERecordShort:
+      required:
+      - pointsTo
+      properties:
+        pointsTo:
+          type: string
+        ttl:
+          type: integer
+          format: int32
+    SPFMRecordShort:
+      required:
+      - spfRules
+      properties:
+        spfRules:
+          type: string
+    NSRecordShort:
+      required:
+      - pointsTo
+      - host
+      properties:
+        pointsTo:
+          type: string
+        ttl:
+          type: integer
+          format: int32
+        host:
+          type: string
     MXRecordShort:
       required:
         - pointsTo
@@ -157,7 +248,6 @@ components:
     ARecordShort:
       required:
         - pointsTo
-        - ttl
       properties:
         pointsTo:
           type: string
@@ -193,6 +283,7 @@ components:
         - service
         - weight
         - port
+        - target
       properties:
         priority:
           type: integer
@@ -204,6 +295,8 @@ components:
           type: integer
         port:
           type: integer
+        target:
+          type: string
         ttl:
           type: integer
           format: int32

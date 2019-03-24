@@ -9,25 +9,20 @@ class RequestHandler(object):
     '''
 
     backend = None
-
     dnswrap = None
 
-    def __init__(self, current_app, **options):
+    def __init__(self, **options):
         self.options = options
 
         self.backend = self.options.get('backend', 'bind')
         ca.logger.info('Using backend {0}'.format(self.backend))
 
         if self.backend == 'bind':
-            self.dnswrap = NSUpdateWrapper()
+            self.dnswrap = NSUpdateWrapper(**options)
         elif self.backend == 'pdns':
-            self.dnswrap = PDNSWrapper(options)
+            self.dnswrap = PDNSWrapper(**options)
 
-    def add_record(self, provider=None, **kwargs):
-        ca.logger.debug("Adding / Updating Record: {0}".format(kwargs))
-        retcode, stdout, stderr = self.dnswrap.run(nsaction='add', nstype=kwargs.get('rtype'), params=kwargs)
-        ca.logger.info('retcode:{0} stdout:{1} stderr:{2}'.format(retcode, stdout, stderr))
-
+    def handle_error(self, retcode, stdout, stderr):
         # We always get a retcode, but not necessarily any data in stdout/stderr. Return what
         # we have and add a generic error message if we dont have any error in stdout
         if retcode == 0:
@@ -39,29 +34,64 @@ class RequestHandler(object):
             else:
                 return [400 + int(retcode), 'Failed to apply changes!']
 
+
+    # ADD records to DNS
+    def add_record(self, provider=None, **kwargs):
+        ca.logger.debug("Adding / Updating Record: {0}".format(kwargs))
+        try:
+            retcode, stdout, stderr = self.dnswrap.run(nsaction='add', nstype=kwargs.get('rtype'), params=kwargs)
+        except TypeError as exec_err:
+            return [500, 'Connector failed to execute: {0}'.format(exec_err)]
+
+        return self.handle_error(retcode, stdout, stderr)
+
     def add_records(self, **kwargs):
         ca.logger.debug("Adding / Updating Records: {0}".format(kwargs))
-        return str(kwargs)
+        try:
+            retcode, stdout, stderr = self.dnswrap.run(nsaction='add', nstype=kwargs)
+        except TypeError as exec_err:
+            return [500, 'Connector failed to execute: {0}'.format(exec_err)]
 
+        return self.handle_error(retcode, stdout, stderr)
+
+    # DELETE records from DNS
     def del_record(self, **kwargs):
         ca.logger.debug("Deleting Record: {0}".format(kwargs))
-        return str(kwargs)
+        try:
+            retcode, stdout, stderr = self.dnswrap.run(nsaction='del', nstype=kwargs.get('rtype'), params=kwargs)
+        except TypeError as exec_err:
+            return [500, 'Connector failed to execute: {0}'.format(exec_err)]
+
+        return self.handle_error(retcode, stdout, stderr)
 
     def del_records(self, **kwargs):
         ca.logger.debug("Deleting Record: {0}".format(kwargs))
-        return str(kwargs)
+        retcode = 412
+        stdout = "not handled"
+        stderr = "not handled"
+        return self.handle_error(retcode, stdout, stderr)
 
-    def get_record(**kwargs):
+
+    # GET records from DNS
+    def get_record(self, **kwargs):
         ca.logger.debug("Retrieving Record: {0}".format(kwargs))
-        return str(kwargs)
+        retcode = 412
+        stdout = "not handled"
+        stderr = "not handled"
+        return self.handle_error(retcode, stdout, stderr)
 
-    def get_zone(**kwargs):
+    def get_entry(self, **kwargs):
+        return get_record(kwargs)
+
+    def get_zone(self, **kwargs):
         ca.logger.debug("Retrieving Zone: {0}".format(kwargs))
-        return str(kwargs)
+        retcode = 413
+        stdout = "not handled"
+        stderr = "not handled"
+        return self.handle_error(retcode, stdout, stderr)
 
 
-
-reqhandler = RequestHandler(ca.config)
+reqhandler = RequestHandler(**ca.config)
 
 def add_record(**kwargs):
     ca.logger.info(kwargs)

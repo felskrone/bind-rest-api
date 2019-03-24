@@ -26,8 +26,9 @@ update {2} {3}.{1} {4} MX {5} {6}
 '''
 
 # {1} = name, {2} = action,  {3} = service, {4} = protocol, {5} = TTL, {6} = priority, {7} = weight, {8} = port, {9} = target
+# _ts3._udp.ts.meinedomain.de 86400 0 5 9987 ts.meinedomain.de
 nsupdate_srvrecord_template = '''\
-update {2} {3}.{4}.{1} {5} SRV {6} {7} {8} {9}
+update {2} {3}.{1} {4} SRV {5} {6} {7} {8}
 \
 '''
 
@@ -49,6 +50,15 @@ class NSUpdateWrapper(object):
 
     def __init__(self, **options):
         self.options = options
+        self.ttl = options.get('default_ttl', default_ttl)
+        self.ns = options.get('default_ns', default_ns)
+
+        if 'Bind' in self.options:
+            self.nscmd = self.options.get('Bind').get('nscmd', default_ns_cmd)
+            self.nskey = self.options.get('Bind').get('keyfile', default_sig_key)
+
+        if os.path.isfile(self.nscmd):
+            raise ValueError("Configured nsupdate-command '{0}' was not found on system!".format(self.nscmd))
 
     def delete(self, params):
         logger.info('Deleting {0}'.format(params))
@@ -60,31 +70,41 @@ class NSUpdateWrapper(object):
 
     def run(self, nsaction=None, nstype=None, params=None):
 
-        ca.logger.info(params)
-        ca.logger.info("nstype: {0}".format(nstype))
-        ca.logger.info("params: {0}".format(params))
+        ca.logger.debug("nsaction: {0} nstype:{1} params:{2}".format(nsaction, nstype, params))
 
         if nsaction in nsactions: #translate actions coming from the API to what nsupdate understands
             if nstype in ('A', 'AAAA', 'CNAME', 'NS', 'TXT', 'SPF'):
+
+                # the actual data fields are named differently depending on the record
+                if nstype == 'A' or nstype == 'CNAME' or nstype == 'NS':
+                    data = params.get('body').get('pointsTo')
+                elif nstype == 'TXT':
+                    data = params.get('body').get('data')
+                elif nstype == 'SPF':
+                    data = params.get('body').get('spfRules')
+                else:
+                    raise ValueError('Missing data-field in record-data: {0}'.format(params))
+
                 tmp = nsupdate_begin_template + nsupdate_gen_record_template + nsupdate_commit_template
                 cmd = tmp.format(
-                    default_ns,
+                    self.ns,
                     params.get('domain'),
                     nsaction,
                     params.get('host'),
-                    params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('ttl') if params.get('body').get('ttl', 0) != 0 else self.ttl,
                     nstype,
-                    params.get('body').get('pointsTo')
+                    data
                 )
 
             elif nstype == "MX":
                 tmp = nsupdate_begin_template + nsupdate_mxrecord_template + nsupdate_commit_template
+
                 cmd = tmp.format(
-                    default_ns,
+                    self.ns,
                     params.get('domain'),
                     nsaction,
                     params.get('host'),
-                    params.get('body').get('ttl') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('ttl') if params.get('body').get('ttl', 0) != 0 else self.ttl,
                     params.get('body').get('priority'),
                     params.get('body').get('pointsTo')
                 )
@@ -92,11 +112,11 @@ class NSUpdateWrapper(object):
             elif nstype == "SRV":
                 tmp = nsupdate_begin_template + nsupdate_srvrecord_template + nsupdate_commit_template
                 cmd = tmp.format(
-                    default_ns,
-                    params.get('body').get('service'),
+                    self.ns,
+                    params.get('domain'),
                     nsaction,
                     params.get('body').get('protocol'),
-                    params.get('body').get('TTL') if params.get('ttl', 0) != 0 else default_ttl,
+                    params.get('body').get('ttl') if params.get('body').get('ttl', 0) != 0 else self.ttl,
                     params.get('body').get('priority'),
                     params.get('body').get('weight'),
                     params.get('body').get('port'),
@@ -113,8 +133,8 @@ class NSUpdateWrapper(object):
         self.write_tmp(cmd)
 
         cmd = '{0} -k {1} {2}'.format(
-            default_ns_cmd,
-            default_sig_key,
+            self.nscmd,
+            self.nskey,
             '/tmp/foo.test'
         )
         ca.logger.info("Running command: {0}".format(cmd))
