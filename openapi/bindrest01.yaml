@@ -254,7 +254,6 @@ components:
     ARecordShort:
       required:
         - pointsTo
-        - ttl
       properties:
         pointsTo:
           type: string
