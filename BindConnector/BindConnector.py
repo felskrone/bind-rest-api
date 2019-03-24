@@ -57,7 +57,7 @@ class NSUpdateWrapper(object):
             self.nscmd = self.options.get('Bind').get('nscmd', default_ns_cmd)
             self.nskey = self.options.get('Bind').get('keyfile', default_sig_key)
 
-        if os.path.isfile(self.nscmd):
+        if not os.path.isfile(self.nscmd):
             raise ValueError("Configured nsupdate-command '{0}' was not found on system!".format(self.nscmd))
 
     def delete(self, params):
