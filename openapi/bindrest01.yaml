@@ -217,11 +217,8 @@ components:
     SPFMRecordShort:
       required:
       - spfRules
-      - host
       properties:
         spfRules:
-          type: string
-        host:
           type: string
     NSRecordShort:
       required:
