@@ -5,5 +5,5 @@ Main:
   port: 53
 
 Bind:
-  nscmd: /usr/local/bin/nsupdate
-  keyfile: /usr/local/bin/update_hosteurope_de.key
+  nscmd: /usr/bin/nsupdate
+  keyfile: /app/template/nsupdate_example_org.key
