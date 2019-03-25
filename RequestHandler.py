@@ -3,7 +3,10 @@ from BindConnector.BindConnector import NSUpdateWrapper
 from PDNSConnector.PDNSConnector import PDNSWrapper
 import dns.zone
 import dns.query
-from lib.dnsaxfr import SimpleAXFR
+from lib.dnslib import SimpleAXFR
+from lib.dnslib import SimpleQuery
+import dns.exception
+
 
 class RequestHandler(object):
     '''
@@ -78,18 +81,26 @@ class RequestHandler(object):
     # GET records from DNS
     def get_record(self, **kwargs):
         ca.logger.debug("Retrieving Record: {0}".format(kwargs))
-        retcode = 412
-        stdout = "not handled"
-        stderr = "not handled"
-        return self.handle_error(retcode, stdout, stderr)
+        qry = SimpleQuery(**self.options)
+        try:
+            return qry.query(
+                rtype=kwargs.get('rtype'),
+                domain=kwargs.get('domain'),
+                host=kwargs.get('host')
+            )
+        except dns.exception.DNSException as dns_err:
+            return [500, str(dns_err)]
 
     def get_entry(self, **kwargs):
         return get_record(kwargs)
 
     def get_zone(self, **kwargs):
         ca.logger.debug("Retrieving Zone: {0}".format(kwargs))
-        dnsaxfr = SimpleAXFR(**self.options)
-        return dnsaxfr.get_zone(kwargs.get('domain'))
+        try:
+            dnsaxfr = SimpleAXFR(**self.options)
+            return dnsaxfr.get_zone(kwargs.get('domain'))
+        except dns.exception.DNSException as dns_err:
+            return [500, str(dns_err)]
 
 
 reqhandler = RequestHandler(**ca.config)
