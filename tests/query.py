@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_add(domain=None, rtype=None, host=None, **options):
-    api = 'http://127.0.0.1:9090/v0.0.2/dns/add/{domain}/{rtype}/{host}'
+    api = 'http://127.0.0.1:9090/v0.0.2/dns/{domain}/{rtype}/{host}'
     headers = {'content-type': 'application/json'}
     api_url = api.format(**{'domain': domain, 'rtype': rtype, 'host': host} )
     logger.info(api_url)
@@ -45,8 +45,23 @@ def run_del(domain=None, rtype=None, host=None, **options):
     else:
         logger.error('{0}: {1}'.format(httpsreq.status_code, httpsreq.text))
 
+def run_get(domain=None, rtype=None, host=None, **options):
 
-def run_get(domain=None):
+    api_get_int = 'http://127.0.0.1:9090/v0.0.2/dns/get/{domain}/{rtype}/{host}'
+    api_url = api_get_int.format(**{'domain': domain, 'rtype':rtype, 'host':host})
+    logger.info(api_url + 'foo')
+    httpsreq = requests.get(
+        url=api_url
+    )
+
+    if httpsreq.status_code == 200:
+        logger.info(pprint.pprint(ast.literal_eval(httpsreq.text)))
+    else:
+        logger.error('{0}: {1}'.format(httpsreq.status_code, httpsreq.text))
+
+
+
+def run_get_zone(domain=None):
 
     api_get_int = 'http://127.0.0.1:9090/v0.0.2/dns/getzone?domain={domain}'
     api_url = api_get_int.format(**{'domain': domain})
@@ -63,7 +78,7 @@ def run_get(domain=None):
 if __name__ == '__main__':
 
 # ZONE
-    run_get(domain='hosteurope.de')
+#    run_get(domain='hosteurope.de')
 #    input("Press Enter to continue...")
 #    run_del(domain='hosteurope.de', rtype='A', host='vs666', options ={"pointsTo": "198.51.100.42", "ttl":100})
 #    input("Press Enter to continue...")
@@ -74,6 +89,8 @@ if __name__ == '__main__':
 #    input("Press Enter to continue...")
 #    run_del(domain='hosteurope.de', rtype='A', host='vs666', options ={"pointsTo": "198.51.100.42", "ttl":100})
 #    input("Press Enter to continue...")
+
+    run_get(domain='hosteurope.de', rtype='MX', host='mx666')
 
 # MX
 #    run_add(domain='hosteurope.de', rtype='MX', host='mx666', options={"pointsTo": "1.2.2.2", "priority": 200})
