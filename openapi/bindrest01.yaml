@@ -24,29 +24,6 @@ tags:
     description: Miscellanous calls
 
 paths:
-  /dns/getzone:
-    get:
-      parameters:
-        - in: query
-          name: domain
-          required: true
-          schema:
-            type: string
-            pattern: '^\w+\.\w+$'
-      summary: Get the complete zone for a certain domain
-      description: Get the complete zone for a certain domain
-      operationId: RequestHandler.get_zone
-      tags:
-        - Misc
-      responses:
-        200:
-          description: JSON response echoing the data
-          content:
-            applicaton/json:
-              schema:
-                type: string
-                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
-
   /dns/delete/{domain}/{rtype}/{host}:
     parameters:
       - in: path
@@ -96,6 +73,64 @@ paths:
                 - $ref: '#/components/schemas/CNAMERecordShort'
                 - $ref: '#/components/schemas/NSRecordShort'
                 - $ref: '#/components/schemas/SPFMRecordShort'
+
+  /dns/getzone:
+    get:
+      parameters:
+        - in: query
+          name: domain
+          required: true
+          schema:
+            type: string
+            pattern: '^\w+\.\w+$'
+      summary: Get the complete zone for a certain domain
+      description: Get the complete zone for a certain domain
+      operationId: RequestHandler.get_zone
+      tags:
+        - Misc
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
+
+  /dns/get/{domain}/{rtype}/{host}:
+    parameters:
+      - in: path
+        name: rtype
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
+      - in: path
+        name: domain
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+\.\w+$'
+      - in: path
+        name: host
+        required: true
+        schema:
+          type: string
+          pattern: '^\w+$'
+    get:
+      summary: Get any single DNS-record from a specific domain/zone
+      description: Get any single DNS-record from a specific domain/zone
+      operationId: RequestHandler.get_record
+      tags:
+        - Single
+      responses:
+        200:
+          description: JSON response echoing the data
+          content:
+            applicaton/json:
+              schema:
+                type: string
+                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
 
   /dns/add/{domain}/{rtype}/{host}:
     parameters:
@@ -147,20 +182,6 @@ paths:
                 - $ref: '#/components/schemas/NSRecordShort'
                 - $ref: '#/components/schemas/SPFMRecordShort'
 
-    get:
-      summary: Get any single DNS-record from a specific domain/zone
-      description: Get any single DNS-record from a specific domain/zone
-      operationId: RequestHandler.get_record
-      tags:
-        - Single
-      responses:
-        200:
-          description: JSON response echoing the data
-          content:
-            applicaton/json:
-              schema:
-                type: string
-                example: "{'body': {'pointsTo': '198.51.100.42', 'priority': 200}, 'domain': 'hosteurope.de', 'host': 'vs6', 'rtype': 'MX'}"
   /dnsmulti/{action}:
     parameters:
       - in: path
