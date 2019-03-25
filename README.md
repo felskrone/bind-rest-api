@@ -9,6 +9,7 @@ Provides the ability to add/update/remove A, AAAA, CNAME, MX, TXT, SRV, or SPFM 
 - nsupdate binary
 - python3.5+
 - connexion
+- python3-dnspython
 
 ## Instructions
 

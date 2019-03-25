@@ -3,7 +3,7 @@ from BindConnector.BindConnector import NSUpdateWrapper
 from PDNSConnector.PDNSConnector import PDNSWrapper
 import dns.zone
 import dns.query
-import json
+from lib.dnsaxfr import SimpleAXFR
 
 class RequestHandler(object):
     '''
@@ -88,13 +88,8 @@ class RequestHandler(object):
 
     def get_zone(self, **kwargs):
         ca.logger.debug("Retrieving Zone: {0}".format(kwargs))
-        z = dns.zone.from_xfr(dns.query.xfr("127.0.0.1", "example.org"))
-        names = z.nodes.keys()
-        zone = ""
-        for n in names:
-            ca.logger.debug(z[n].to_text(n))
-            zone += z[n].to_text(n)
-        return json.dumps(zone)
+        dnsaxfr = SimpleAXFR(**self.options)
+        return dnsaxfr.get_zone(kwargs.get('domain'))
 
 
 reqhandler = RequestHandler(**ca.config)
